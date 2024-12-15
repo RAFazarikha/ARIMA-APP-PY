@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 import sqlite3
+from streamlit.runtime.scriptrunner import RerunException
+from streamlit.runtime.state import get_script_run_ctx
 
 # Database setup
 def init_db():
@@ -60,6 +62,10 @@ def forecast_arima(data, steps):
     forecast = model_fit.forecast(steps=steps)
     return forecast
 
+def refresh_page():
+    # Function to refresh the page
+    raise RerunException(get_script_run_ctx())
+
 # Streamlit app
 def main():
     st.title("Time-Series Forecasting with ARIMA")
@@ -91,11 +97,13 @@ def main():
         if st.button("Update Data"):
             update_data_in_db(edit_date, new_value)
             st.success(f"Data for {edit_date} updated successfully!")
+            refresh_page()
 
         # Delete last data functionality
         if st.button("Delete Last Data"):
             delete_last_data_in_db()
             st.success("Last data entry deleted successfully!")
+            refresh_page()
 
         # Convert date column to datetime
         data_df['date'] = pd.to_datetime(data_df['date'], format='%Y-%m')
